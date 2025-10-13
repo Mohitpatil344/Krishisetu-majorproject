@@ -16,21 +16,7 @@ const Rental = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  // COMPREHENSIVE DEBUG LOGGING
-  useEffect(() => {
-    console.log("====== RENTAL PAGE DEBUG INFO ======");
-    console.log("1. Auth Loading:", authLoading);
-    console.log("2. User Object:", user);
-    console.log("3. User Role:", user?.role);
-    console.log("4. User Role Type:", typeof user?.role);
-    console.log("5. Token in localStorage:", localStorage.getItem('token'));
-    console.log("6. hasRole function:", hasRole);
-    console.log("7. hasRole('business'):", hasRole('business'));
-    console.log("8. Direct comparison (user?.role === 'business'):", user?.role === 'business');
-    console.log("9. User ID:", user?.id);
-    console.log("10. User _id:", user?._id);
-    console.log("=====================================");
-  }, [user, authLoading, hasRole]);
+
 
   // Fetch equipment on component mount
   useEffect(() => {
@@ -43,9 +29,7 @@ const Rental = () => {
     try {
       setLoading(true);
       setError(null);
-      console.log("Fetching equipment...");
       const response = await equipmentService.getAllEquipment();
-      console.log("Equipment response:", response);
       setRentals(response.data.equipment || []);
     } catch (err) {
       setError(err.message || 'Failed to load equipment');
@@ -60,16 +44,13 @@ const Rental = () => {
   };
 
   const handleEditClick = (equipment) => {
-    console.log("Edit clicked for:", equipment);
     setEditingEquipment(equipment);
     setIsModalOpen(true);
   };
 
   const handleAddEquipment = async (equipment) => {
     try {
-      console.log("Adding equipment:", equipment);
       const response = await equipmentService.addEquipment(equipment);
-      console.log("Add response:", response);
       
       if (response.success) {
         setRentals([response.data.equipment, ...rentals]);
@@ -85,10 +66,8 @@ const Rental = () => {
   const handleUpdateEquipment = async (updatedEquipment) => {
     try {
       const { _id, ...equipmentData } = updatedEquipment;
-      console.log("Updating equipment:", _id, equipmentData);
       
       const response = await equipmentService.updateEquipment(_id, equipmentData);
-      console.log("Update response:", response);
       
       if (response.success) {
         setRentals(prevRentals =>
@@ -152,33 +131,13 @@ const Rental = () => {
     );
   }
 
-  // Check if user is business (for debugging)
+  // Check if user is business
   const isBusinessUser = hasRole('business');
-  console.log("Is Business User (render check):", isBusinessUser);
 
   return (
     <div className="pt-16 min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50">
       <div className="container mx-auto px-4 py-10 max-w-6xl">
         
-        {/* DEBUG PANEL - REMOVE IN PRODUCTION */}
-        <div className="mb-6 p-6 bg-blue-50 border-2 border-blue-300 rounded-xl">
-          <h3 className="font-bold text-blue-900 mb-3">🔍 DEBUG PANEL (Remove in production)</h3>
-          <div className="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <p><strong>User Email:</strong> {user?.email || 'Not logged in'}</p>
-              <p><strong>User Role:</strong> {user?.role || 'No role'}</p>
-              <p><strong>Role Type:</strong> {typeof user?.role}</p>
-              <p><strong>User ID:</strong> {user?.id || user?._id || 'No ID'}</p>
-            </div>
-            <div>
-              <p><strong>Has Token:</strong> {localStorage.getItem('token') ? '✅ Yes' : '❌ No'}</p>
-              <p><strong>hasRole('business'):</strong> {isBusinessUser ? '✅ True' : '❌ False'}</p>
-              <p><strong>Direct Check:</strong> {user?.role === 'business' ? '✅ True' : '❌ False'}</p>
-              <p><strong>Should Show Button:</strong> {isBusinessUser ? '✅ YES' : '❌ NO'}</p>
-            </div>
-          </div>
-        </div>
-
         <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
@@ -197,13 +156,10 @@ const Rental = () => {
           </p>
         </motion.div>
 
-        {/* BUTTON WITH DETAILED LOGGING */}
-        {console.log("Rendering button section, isBusinessUser:", isBusinessUser)}
         {isBusinessUser ? (
           <div className="flex justify-center mb-8">
             <button
               onClick={() => {
-                console.log("Add Equipment button clicked!");
                 setEditingEquipment(null);
                 setIsModalOpen(true);
               }}
@@ -213,14 +169,7 @@ const Rental = () => {
               Add New Equipment
             </button>
           </div>
-        ) : (
-          <div className="flex justify-center mb-8 p-4 bg-yellow-50 border border-yellow-300 rounded-xl">
-            <p className="text-yellow-800">
-              ⚠️ Button hidden because isBusinessUser = {String(isBusinessUser)} 
-              (Role: {user?.role || 'undefined'})
-            </p>
-          </div>
-        )}
+        ) : null}
 
         <motion.div
           initial={{ opacity: 0 }}
@@ -233,11 +182,6 @@ const Rental = () => {
               const canEditThis = isBusinessUser && (
                 rental.businessId === user?.id || rental.businessId === user?._id
               );
-              console.log(`Can edit ${rental.name}:`, canEditThis, {
-                rentalBusinessId: rental.businessId,
-                userId: user?.id,
-                user_id: user?._id
-              });
               
               return (
                 <CardRental
@@ -267,7 +211,6 @@ const Rental = () => {
       </div>
 
       {/* Modal - render for business users */}
-      {console.log("Rendering modal, isBusinessUser:", isBusinessUser, "isModalOpen:", isModalOpen)}
       {isBusinessUser && (
         <AddEquipmentModal
           isOpen={isModalOpen}

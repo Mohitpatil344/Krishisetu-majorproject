@@ -457,7 +457,7 @@ function RenterDashboard() {
             </div>
           </div>
         </div>
-      )}x
+      )}
     </div>
   );
 }

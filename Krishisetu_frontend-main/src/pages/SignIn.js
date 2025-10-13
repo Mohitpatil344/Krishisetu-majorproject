@@ -15,18 +15,19 @@ const SignIn = () => {
   const [loginError, setLoginError] = useState('');
 
   const navigate = useNavigate();
-  const { selectedRole, clearRole } = useRole();
-  const { login } = useAuth(); // Add this line to get login function from AuthContext
+  const location = useLocation();
+  const { selectedRole, clearRole, setSelectedRole } = useRole();
+  const { setAuthData } = useAuth(); // Use setAuthData instead of login
 
   // Redirect if no role selected
   useEffect(() => {
     if (!selectedRole) {
       navigate('/role-selection');
-    } else if (location.state?.selectedRole && location.state.selectedRole !== contextRole) {
+    } else if (location.state?.selectedRole && location.state.selectedRole !== selectedRole) {
       // Update context if role comes from location state
       setSelectedRole(location.state.selectedRole);
     }
-  }, [selectedRole, navigate, location.state, contextRole, setSelectedRole]);
+  }, [selectedRole, navigate, location.state, setSelectedRole]);
 
   const validateForm = () => {
     const newErrors = {};
@@ -70,8 +71,8 @@ const SignIn = () => {
         throw new Error(data.message || 'Login failed');
       }
 
-      // Update auth context
-      await login(data.token, data.user || data.data);
+      // Update auth context with token and user data
+      setAuthData(data.data.token, data.data.user);
 
       // Navigate based on role
       if (selectedRole === 'farmer') {

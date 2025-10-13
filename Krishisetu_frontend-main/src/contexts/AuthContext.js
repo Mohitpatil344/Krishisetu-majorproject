@@ -1,6 +1,7 @@
 // src/contexts/AuthContext.js
 import { createContext, useContext, useState, useEffect } from 'react';
 
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 const AuthContext = createContext();
 
 export function useAuth() {
@@ -13,35 +14,44 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [token, setToken] = useState(localStorage.getItem('auth_token'));
   const [loading, setLoading] = useState(true);
 
   // Check auth status on mount
   useEffect(() => {
+    console.log('AuthContext: Token on mount:', token);
     if (token) {
       // Fetch user profile when token exists
+      console.log('AuthContext: Fetching user profile with token:', token);
       fetchUserProfile();
     } else {
+      console.log('AuthContext: No token found, setting loading to false');
       setLoading(false);
     }
   }, [token]);
 
   const fetchUserProfile = async () => {
     try {
-      const response = await fetch(`${API_URL}/auth/me`, {
+      console.log('AuthContext: Making request to /api/auth/me with token:', token);
+      const response = await fetch(`${API_URL}/api/auth/me`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
       
+      console.log('AuthContext: Response status:', response.status);
+      
       if (response.ok) {
         const { data } = await response.json();
-        setUser(data);
+        console.log('AuthContext: User data received:', data.user);
+        setUser(data.user);
       } else {
+        console.log('AuthContext: Token invalid, logging out');
         // If token is invalid, logout
         logout();
       }
     } catch (error) {
-      console.error('Error fetching user profile:', error);
+      console.error('AuthContext: Error fetching user profile:', error);
       logout();
     } finally {
       setLoading(false);
@@ -114,16 +124,32 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  const setAuthData = (token, userData) => {
+    console.log('setAuthData called with:', { token, userData });
+    localStorage.setItem('auth_token', token);
+    setToken(token);
+    setUser(userData);
+    console.log('User data set:', userData);
+  };
+
   const hasRole = (role) => {
-    return user?.role === role;
+    // Add debugging logs
+    console.log('Checking role:', role);
+    console.log('Current user:', user);
+    console.log('User role:', user?.role);
+    return user?.role?.toLowerCase() === role?.toLowerCase();
   };
 
   const value = {
     user,
+    token,
     login,
     logout,
+    register,
+    setAuthData,
     hasRole,
-    isAuthenticated: !!user
+    isAuthenticated: !!user,
+    loading
   };
 
   return (
