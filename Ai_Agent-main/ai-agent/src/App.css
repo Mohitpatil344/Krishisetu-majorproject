@@ -1,0 +1,245 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Dark mode colors (default) */
+  --bg-dark: #0f172a;
+  --bg-medium: #1e293b;
+  --bg-light: #334155;
+  
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #64748b;
+  
+  --primary: #3b82f6;
+  --primary-dark: #1d4ed8;
+  --primary-light: #60a5fa;
+  
+  --secondary: #10b981;
+  --secondary-dark: #047857;
+  --secondary-light: #34d399;
+  
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  
+  /* Border and shadow colors */
+  --border-color: rgba(255, 255, 255, 0.1);
+  --shadow-color: rgba(0, 0, 0, 0.3);
+  
+  /* Layout variables */
+  --header-height: 72px;
+}
+
+.light {
+  /* Light mode colors */
+  --bg-dark: #ffffff;
+  --bg-medium: #f8fafc;
+  --bg-light: #e2e8f0;
+  
+  --text-primary: #1e293b;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  
+  --primary: #3b82f6;
+  --primary-dark: #1d4ed8;
+  --primary-light: #60a5fa;
+  
+  --secondary: #10b981;
+  --secondary-dark: #047857;
+  --secondary-light: #34d399;
+  
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --error: #ef4444;
+  
+  /* Border and shadow colors for light mode */
+  --border-color: rgba(0, 0, 0, 0.1);
+  --shadow-color: rgba(0, 0, 0, 0.1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--bg-dark);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* App Layout */
+.App {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.app-header {
+  height: var(--header-height);
+  flex-shrink: 0;
+  z-index: 50;
+  position: relative;
+}
+
+.app-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Custom scrollbar */
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg-light) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--bg-light);
+  border-radius: 3px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Animation classes */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Theme transition for all elements */
+* {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+}
+
+/* Light mode specific overrides */
+.light body {
+  background-color: var(--bg-dark);
+}
+
+.light .bg-background-dark {
+  background-color: var(--bg-dark) !important;
+}
+
+.light .bg-background-medium {
+  background-color: var(--bg-medium) !important;
+}
+
+.light .bg-background-light {
+  background-color: var(--bg-light) !important;
+}
+
+.light .text-text-primary {
+  color: var(--text-primary) !important;
+}
+
+.light .text-text-secondary {
+  color: var(--text-secondary) !important;
+}
+
+.light .text-text-muted {
+  color: var(--text-muted) !important;
+}
+
+.light .border-white\/5 {
+  border-color: var(--border-color) !important;
+}
+
+.light .border-white\/10 {
+  border-color: var(--border-color) !important;
+}
+
+/* Loading animation improvements */
+.animate-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-bounce {
+  animation: bounce 1s infinite;
+}
+
+/* Focus styles for accessibility */
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Message type specific styles */
+.message-user {
+  flex-direction: row-reverse;
+}
+
+.message-user .flex-1 {
+  margin-right: 0.75rem;
+  margin-left: 0;
+}
+
+/* Responsive design improvements */
+@media (max-width: 768px) {
+  :root {
+    --header-height: 64px;
+  }
+  
+  .animate-fade-in {
+    animation-duration: 0.2s;
+  }
+}
+
+/* Dropdown z-index fix */
+.dropdown-menu {
+  z-index: 9999 !important;
+}
+
+/* Ensure proper stacking */
+.chat-container {
+  position: relative;
+  z-index: 1;
+}
+
+.sidebar {
+  position: relative;
+  z-index: 2;
+}
+
+.header {
+  position: relative;
+  z-index: 10;
+}
