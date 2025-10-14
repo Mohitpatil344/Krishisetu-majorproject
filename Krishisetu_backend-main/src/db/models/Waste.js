@@ -1,16 +1,10 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const wasteSchema = new mongoose.Schema({
-auth0Id: {
-  type: String,
-  required: false,  // ✅ not all users will have Auth0 IDs
-  index: true,
-  sparse: true      // ✅ avoids duplicate-null issue
-},
-  seller: {
+  owner: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: false  // Make it optional since we're using auth0Id as primary identifier
+    required: [true, 'Owner (farmer) is required']
   },
   cropType: {
     type: String,
@@ -71,11 +65,6 @@ wasteSchema.index({
 wasteSchema.index({ status: 1 });
 wasteSchema.index({ 'location.pincode': 1 });
 wasteSchema.index({ availableFrom: 1 });
-wasteSchema.index({ auth0Id: 1 });
-
-// Add compound index for farmer queries
-wasteSchema.index({ auth0Id: 1, createdAt: -1 });
-
 const Waste = mongoose.model('Waste', wasteSchema);
 
-export default Waste;
+module.exports = Waste;

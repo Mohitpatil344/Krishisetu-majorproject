@@ -6,15 +6,13 @@ import {
   User, MapPin, Phone, TreePine, Scale, 
   Package, Plus, Trash2, Mail, Sprout, BarChart, Award, CheckCircle, MoreVertical, Edit2
 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
+import FarmerWasteCard from '../components/FarmerWasteCard';
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
 const FarmerDashboard = () => {
-  // Mock user data for now - replace with actual user from AuthContext when backend is ready
-  const user = {
-    sub: 'auth0|1234567890',
-    name: 'John Farmer',
-    email: 'farmer@example.com',
-    picture: null
-  };
+  const { user: authUser } = useAuth();
+  const currentUserId = authUser?.id || null;
   const [farmer, setFarmer] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -49,10 +47,10 @@ const FarmerDashboard = () => {
         setIsLoading(true);
         
         // Simulate API delay
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        await new Promise(resolve => setTimeout(resolve, 500));
         
-        // Mock farmer data
-        const mockFarmer = {
+        // Prefer current authenticated user; fallback to mock only if unavailable
+        const fallbackFarmer = {
           name: 'John Farmer',
           email: 'farmer@example.com',
           phone: '+91 98765 43210',
@@ -63,46 +61,37 @@ const FarmerDashboard = () => {
           }
         };
 
-        // Mock waste listings
-        const mockWasteListings = [
-          {
-            _id: '1',
-            cropType: 'Rice',
-            wasteType: 'straw',
-            quantity: 100,
-            unit: 'kg',
-            price: 25,
-            availableFrom: new Date().toISOString(),
-            status: 'available',
-            auth0Id: '1234567890',
-            location: {
-              district: 'Punjab',
-              state: 'Punjab',
-              pincode: '140001'
-            },
-            description: 'High quality rice straw available for purchase'
-          },
-          {
-            _id: '2',
-            cropType: 'Wheat',
-            wasteType: 'husk',
-            quantity: 50,
-            unit: 'kg',
-            price: 30,
-            availableFrom: new Date().toISOString(),
-            status: 'available',
-            auth0Id: '1234567890',
-            location: {
-              district: 'Punjab',
-              state: 'Punjab',
-              pincode: '140001'
-            },
-            description: 'Fresh wheat husk from organic farming'
-          }
-        ];
+        const resolvedFarmer = authUser
+          ? {
+              name: authUser.name,
+              email: authUser.email,
+              phone: authUser.phone || '—',
+              picture: authUser.picture || null,
+              farmDetails: {
+                farmSize: authUser.farmDetails?.farmSize || '—',
+                primaryCrops: authUser.farmDetails?.primaryCrops || '—'
+              }
+            }
+          : fallbackFarmer;
 
-        setFarmer(mockFarmer);
-        setWasteListing(mockWasteListings);
+        setFarmer(resolvedFarmer);
+        // Fetch current farmer wastes
+        try {
+          const token = localStorage.getItem('auth_token');
+          const resp = await fetch(`${API_URL}/api/waste/mine`, {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          if (resp.ok) {
+            const json = await resp.json();
+            setWasteListing(json.data.wastes || []);
+          } else {
+            setWasteListing([]);
+          }
+        } catch (fetchErr) {
+          setWasteListing([]);
+        }
 
       } catch (err) {
         console.error('Error details:', err);
@@ -114,7 +103,7 @@ const FarmerDashboard = () => {
     };
 
     fetchAllData();
-  }, []);
+  }, [authUser]);
 
   // Loading state
   if (isLoading) {
@@ -150,16 +139,15 @@ const FarmerDashboard = () => {
     try {
       const formData = {
         ...newWaste,
-        auth0Id: user.sub.split('|')[1],
         quantity: Number(newWaste.quantity),
-        price: Number(newWaste.price),
-        status: 'available'
+        price: Number(newWaste.price)
       };
 
-      const response = await fetch('https://knowcode-protobuf-backend-k16r.vercel.app/api/v1/waste/add', {
+      const response = await fetch(`${API_URL}/api/waste/add`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
         },
         body: JSON.stringify(formData)
       });
@@ -171,9 +159,8 @@ const FarmerDashboard = () => {
 
       const data = await response.json();
 
-      if (data.status === 'success') {
-        // Add new waste to the list with the returned data
-        setWasteListing([...wasteListing, data.data]);
+      if (data.success) {
+        setWasteListing([data.data.waste, ...wasteListing]);
         setShowAddWasteModal(false);
         
         // Reset form
@@ -205,20 +192,17 @@ const FarmerDashboard = () => {
 
   const handleStatusUpdate = async (wasteId, newStatus) => {
     try {
-      const auth0Id = user.sub.split('|')[1];
+      const auth0Id = currentUserId;
       
       const response = await fetch(
-        `https://knowcode-protobuf-backend-k16r.vercel.app/api/v1/waste/${wasteId}/status`,
+        `${API_URL}/api/waste/${wasteId}/sold`,
         {
           method: 'PATCH',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
           },
-          body: JSON.stringify({
-            status: newStatus,
-            auth0Id: auth0Id,
-            wasteId: wasteId
-          })
+          body: JSON.stringify({})
         }
       );
 
@@ -243,7 +227,7 @@ const FarmerDashboard = () => {
 
   // Add error handling for the status update modal
   const openStatusModal = (waste) => {
-    if (waste.auth0Id !== user.sub.split('|')[1]) {
+    if (!currentUserId || (waste.owner && waste.owner !== currentUserId)) {
       alert('You can only update your own waste listings');
       return;
     }
@@ -328,72 +312,11 @@ const FarmerDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.isArray(wasteListing) && wasteListing.length > 0 ? (
             wasteListing.map((waste) => (
-              <motion.div
-                key={waste._id || `waste-${Date.now()}-${Math.random()}`}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-white/80 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-green-100"
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <span className="px-3 py-1 bg-green-100 text-green-700 text-sm rounded-full capitalize">
-                      {waste.wasteType}
-                    </span>
-                    <h3 className="font-semibold text-gray-800 mt-2">{waste.cropType}</h3>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`px-2 py-1 rounded-lg text-xs ${
-                      waste.status === 'available' ? 'bg-green-100 text-green-700' :
-                      waste.status === 'booked' ? 'bg-yellow-100 text-yellow-700' :
-                      waste.status === 'sold' ? 'bg-blue-100 text-blue-700' :
-                      'bg-red-100 text-red-700'
-                    } capitalize`}>
-                      {waste.status}
-                    </span>
-                    {waste.auth0Id === user.sub.split('|')[1] && (
-                      <button
-                        onClick={() => openStatusModal(waste)}
-                        className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-                      >
-                        <Edit2 className="w-4 h-4 text-gray-500" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Quantity</span>
-                    <span className="font-medium">{waste.quantity} {waste.unit}</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Price</span>
-                    <span className="font-medium text-green-600">₹{waste.price}/{waste.unit}</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2">
-                    <span className="text-gray-600">Available From</span>
-                    <span className="font-medium">{new Date(waste.availableFrom).toLocaleDateString()}</span>
-                  </div>
-                </div>
-
-                {waste.description && (
-                  <p className="mt-4 text-sm text-gray-600 italic">"{waste.description}"</p>
-                )}
-
-                <div className="mt-4 pt-4 border-t border-gray-100">
-                  <div className="flex items-start gap-2">
-                    <MapPin className="w-4 h-4 text-gray-400 mt-1" />
-                    <div>
-                      <p className="text-sm text-gray-600">{waste.location.district}, {waste.location.state}</p>
-                      <p className="text-xs text-gray-500">PIN: {waste.location.pincode}</p>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
+              <FarmerWasteCard key={waste._id} waste={waste} onEdit={openStatusModal} />
             ))
           ) : (
             <div className="col-span-3 text-center py-8">
-              <p className="text-gray-500 mb-4">No waste listings available</p>
+              <p className="text-gray-500 mb-4">No waste posted.</p>
               <button
                 onClick={() => setShowAddWasteModal(true)}
                 className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
@@ -412,7 +335,16 @@ const FarmerDashboard = () => {
               animate={{ scale: 1, opacity: 1 }}
               className="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[90vh] overflow-y-auto"
             >
-              <h3 className="text-xl font-semibold mb-4">Add New Waste Listing</h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xl font-semibold">Add New Waste Listing</h3>
+                <button
+                  onClick={() => setShowAddWasteModal(false)}
+                  aria-label="Close"
+                  className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center text-gray-500"
+                >
+                  ×
+                </button>
+              </div>
               <form onSubmit={handleAddWaste} className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* Crop Type */}

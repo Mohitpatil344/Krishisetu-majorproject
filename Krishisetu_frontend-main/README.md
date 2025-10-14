@@ -34,7 +34,7 @@ Greenify is a React-based web application that addresses the critical challenge 
 - **Create React App** - Build tooling
 - **ESLint** - Code linting
 - **PostCSS** - CSS processing
-
+Updated Readme
 ## 📁 Project Structure
 
 ```

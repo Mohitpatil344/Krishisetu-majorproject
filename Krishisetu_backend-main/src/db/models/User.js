@@ -34,6 +34,11 @@ const userSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  // Optional list of waste listings owned by the user (used only for farmers)
+  myWastes: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Waste',
+  }],
   createdAt: {
     type: Date,
     default: Date.now

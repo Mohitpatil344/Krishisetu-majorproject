@@ -7,6 +7,7 @@ const connectDB = require('./config/database');
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
 const equipmentRoutes = require('./routes/equipmentRoutes');
+const wasteRoutes = require('./routes/wasteRoute');
 
 // Load environment variables
 dotenv.config();
@@ -19,7 +20,9 @@ connectDB();
 
 // Middleware
 app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:3001",
+  origin: process.env.FRONTEND_URL
+    ? process.env.FRONTEND_URL
+    : ["http://localhost:3000", "http://localhost:3001"],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
@@ -55,6 +58,7 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/equipment', equipmentRoutes);
+app.use('/api/waste', wasteRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {
