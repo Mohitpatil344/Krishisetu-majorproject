@@ -22,6 +22,7 @@ import RentalDetails from "./pages/Rentaldetails";
 import BookingPage from "./pages/BookingPage";
 import AgreementPage from "./pages/Agreementpage";
 import RenterDashboard from "./pages/RenterDashboard";
+import WasteConversionPage from "./pages/WasteConversionPage";
 
 // Protected Route Component
 const ProtectedRoute = ({ children, requiredRole }) => {
@@ -81,6 +82,7 @@ const AppContent = () => {
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/ai-lab" element={<AILab />} />
           <Route path="/waste/:id" element={<FarmerDetail />} />
+          <Route path="/waste-conversion" element={<WasteConversionPage />} />
           <Route 
             path="/farmerDashboard" 
             element={

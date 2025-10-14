@@ -20,6 +20,7 @@ import {
   Brain,
   Building2,
   Package,
+  Recycle
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import {
@@ -51,6 +52,11 @@ const TopNavigation = () => {
         href: "/rental",
         label: "Rental",
         icon: <Tractor className="w-4 h-4" />,
+      },
+      {
+        href: "/waste-conversion",
+        label: "Waste Conversion",
+        icon: <Recycle className="w-4 h-4" />,
       },
     ];
 
