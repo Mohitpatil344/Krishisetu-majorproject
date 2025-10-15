@@ -14,7 +14,6 @@ import RoleSelection from "./pages/RoleSelection";
 import FarmerRegistration from "./pages/FarmerRegistration";
 import BusinessRegistration from "./pages/BusinessRegistration";
 import ResourcesPage from "./pages/ResourcesPage";
-import OTPVerification from "./pages/OTPVerification";
 import FarmerDashboard from "./pages/FarmerDashboard";
 import BusinessDashboard from "./pages/BusinessDashboard";
 import Rental from "./pages/Rental";
@@ -23,7 +22,8 @@ import BookingPage from "./pages/BookingPage";
 import AgreementPage from "./pages/Agreementpage";
 import RenterDashboard from "./pages/RenterDashboard";
 import WasteConversionPage from "./pages/WasteConversionPage";
-import Marketplaces from "./components/Marketplace/Marketplace";
+import { ShoppingBag } from "phosphor-react";
+import DigitalMarketplace from './pages/DigitalMarketplace';
 
 // Protected Route Component
 const ProtectedRoute = ({ children, requiredRole }) => {
@@ -78,13 +78,13 @@ const AppContent = () => {
           <Route path="/rental-details" element={<RentalDetails />} />
           <Route path="/farmer-registration" element={<FarmerRegistration />} />
           <Route path="/business-registration" element={<BusinessRegistration />} />
-          <Route path="/verify-otp" element={<OTPVerification />} />
+       
           <Route path="/learn" element={<ResourcesPage />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/ai-lab" element={<AILab />} />
           <Route path="/waste/:id" element={<FarmerDetail />} />
           <Route path="/waste-conversion" element={<WasteConversionPage />} />
-          <Route path="/digitalmarketplace" element={<Marketplaces />} />
+
 
           <Route 
             path="/farmerDashboard" 
@@ -102,6 +102,7 @@ const AppContent = () => {
               </ProtectedRoute>
             } 
           />
+          <Route path="/digitalmarketplace" element={<DigitalMarketplace />} />
           <Route path="*" element={<h1>404 Not Found</h1>} />
         </Routes>
       </Router>
@@ -120,3 +121,87 @@ function App() {
 }
 
 export default App;
+
+export const navLinks = [
+  {
+    href: "/",
+    label: "Home",
+  },
+  {
+    href: "/role-selection",
+    label: "Role Selection",
+  },
+  {
+    href: "/signin",
+    label: "Sign In",
+  },
+  {
+    href: "/register",
+    label: "Register",
+  },
+  {
+    href: "/dashboard",
+    label: "Dashboard",
+  },
+  {
+    href: "/booking",
+    label: "Booking",
+  },
+  {
+    href: "/agreement",
+    label: "Agreement",
+  },
+  {
+    href: "/renter-dashboard",
+    label: "Renter Dashboard",
+  },
+  {
+    href: "/rental",
+    label: "Rental",
+  },
+  {
+    href: "/rental-details",
+    label: "Rental Details",
+  },
+  {
+    href: "/farmer-registration",
+    label: "Farmer Registration",
+  },
+  {
+    href: "/business-registration",
+    label: "Business Registration",
+  },
+  {
+    href: "/learn",
+    label: "Learn",
+  },
+  {
+    href: "/marketplace",
+    label: "Marketplace",
+  },
+  {
+    href: "/ai-lab",
+    label: "AI Lab",
+  },
+  {
+    href: "/waste/:id",
+    label: "Waste Detail",
+  },
+  {
+    href: "/waste-conversion",
+    label: "Waste Conversion",
+  },
+  {
+    href: "/farmerDashboard",
+    label: "Farmer Dashboard",
+  },
+  {
+    href: "/businessDashboard",
+    label: "Business Dashboard",
+  },
+  {
+    href: "/digitalmarketplace",
+    label: "Digital Marketplace",
+    icon: <ShoppingBag className="w-4 h-4" />,
+  },
+];

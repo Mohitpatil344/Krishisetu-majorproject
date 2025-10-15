@@ -24,6 +24,7 @@
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.3",
     "lucide-react": "^0.288.0",
+    "phosphor-react": "^1.4.1",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.3.0",
     "react-datepicker": "^8.7.0",
