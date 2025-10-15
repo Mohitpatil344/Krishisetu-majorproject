@@ -7,6 +7,7 @@ const connectDB = require('./config/database');
 const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
 const equipmentRoutes = require('./routes/equipmentRoutes');
+const bookingRoutes = require('./routes/bookingRoutes');
 
 // Load environment variables
 dotenv.config();
@@ -55,6 +56,7 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/equipment', equipmentRoutes);
+app.use('/api/bookings', bookingRoutes);
 
 // 404 handler
 app.use('*', (req, res) => {

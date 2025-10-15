@@ -204,7 +204,7 @@ const Rentaldetails = () => {
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors">
+                {/* <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-2xl hover:bg-gray-100 transition-colors">
                   <div className="bg-blue-100 p-3 rounded-xl">
                     <Navigation className="w-6 h-6 text-blue-600" />
                   </div>
@@ -219,7 +219,7 @@ const Rentaldetails = () => {
                 <button className="w-full mt-4 bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-3 px-6 rounded-xl font-medium hover:from-blue-700 hover:to-cyan-700 transition-all shadow-md hover:shadow-lg flex items-center justify-center gap-2">
                   <Navigation className="w-5 h-5" />
                   Get Directions
-                </button>
+                </button> */}
               </div>
             </div>
           </div>

@@ -84,3 +84,5 @@ const checkRole = (allowedRoles) => {
 };
 
 module.exports = { authenticateToken, checkRole };
+
+module.exports.default = authenticateToken;

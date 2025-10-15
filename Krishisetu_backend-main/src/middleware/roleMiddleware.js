@@ -1,5 +1,5 @@
 // middleware/roleMiddleware.js
-const roleMiddleware = (...allowedRoles) => {
+const roleMiddleware = (allowedRoles) => {
   return (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({ 
