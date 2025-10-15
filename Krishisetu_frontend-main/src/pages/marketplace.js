@@ -17,9 +17,9 @@ const Marketplace = () => {
   const fetchWasteListings = useCallback(async (searchQuery = '') => {
     try {
       setIsLoading(true);
-      
+
       // Determine which endpoint to use based on search query
-      const url = searchQuery 
+      const url = searchQuery
         ? `https://knowcode-protobuf-backend.vercel.app/api/v1/waste/search?query=${encodeURIComponent(searchQuery)}`
         : 'https://knowcode-protobuf-backend.vercel.app/api/v1/waste/all';
 
@@ -31,7 +31,7 @@ const Marketplace = () => {
       }
 
       // Update data extraction based on API response structure
-      const listings = searchQuery 
+      const listings = searchQuery
         ? responseData.data.wastes // For search endpoint
         : responseData.data.waste; // For all listings endpoint
 
@@ -65,14 +65,14 @@ const Marketplace = () => {
   }, [searchTerm, fetchWasteListings]);
 
   return (
-    <motion.div 
+    <motion.div
       initial={animateEntrance ? { scale: 1.2, opacity: 0 } : false}
       animate={{ scale: 1, opacity: 1, rotate: 0 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
       className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 pt-24 px-6 pb-20"
     >
       <div className="container mx-auto">
-        <motion.div 
+        <motion.div
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           className="text-center mb-12"
@@ -157,11 +157,10 @@ const Marketplace = () => {
                       </div>
                     </div>
                   </div>
-                  <span className={`px-2 py-1 text-xs rounded-full ${
-                    waste.status === 'available' ? 'bg-green-100 text-green-700' :
-                    waste.status === 'booked' ? 'bg-yellow-100 text-yellow-700' :
-                    'bg-red-100 text-red-700'
-                  }`}>
+                  <span className={`px-2 py-1 text-xs rounded-full ${waste.status === 'available' ? 'bg-green-100 text-green-700' :
+                      waste.status === 'booked' ? 'bg-yellow-100 text-yellow-700' :
+                        'bg-red-100 text-red-700'
+                    }`}>
                     {waste.status}
                   </span>
                 </div>
@@ -193,7 +192,7 @@ const Marketplace = () => {
                 </div>
 
                 {waste.status === 'available' && (
-                  <button 
+                  <button
                     onClick={() => navigate(`/waste/${waste._id}`)}
                     className="w-full px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white rounded-lg hover:shadow-lg hover:shadow-green-500/30 transition-all"
                   >

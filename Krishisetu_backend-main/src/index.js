@@ -8,6 +8,7 @@ const authRoutes = require('./routes/authRoutes');
 const productRoutes = require('./routes/productRoutes');
 const equipmentRoutes = require('./routes/equipmentRoutes');
 const wasteRoutes = require('./routes/wasteRoute');
+const biddingRoutes = require('./routes/biddingRoutes');
 
 // Load environment variables
 dotenv.config();
@@ -59,6 +60,8 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/equipment', equipmentRoutes);
 app.use('/api/waste', wasteRoutes);
+app.use('/api/bids', biddingRoutes);
+
 
 // 404 handler
 app.use('*', (req, res) => {
