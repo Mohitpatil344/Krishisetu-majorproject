@@ -38,7 +38,7 @@ const Register = () => {
 
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required';
-    } else if (formData.name.trim().length > 100) {
+    } else if (formData.name.length > 100) {
       newErrors.name = 'Name cannot exceed 100 characters';
     }
 
@@ -105,7 +105,7 @@ const Register = () => {
         // Redirect to login page after 1 second
         setTimeout(() => {
           navigate('/signin', { 
-            state: { selectedRole },
+            state: { selectedRole: selectedRole },
             replace: true 
           });
         }, 1000);
@@ -229,7 +229,7 @@ const Register = () => {
               {errors.email && <p className="mt-1 text-xs text-red-500">{errors.email}</p>}
             </div>
 
-            {/* Phone Field (Optional) */}
+            {/* Phone Field */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 Phone <span className="text-gray-400 font-normal">(Optional)</span>
@@ -247,7 +247,7 @@ const Register = () => {
               </div>
             </div>
 
-            {/* Location Field (Optional) */}
+            {/* Location Field */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1.5">
                 Location <span className="text-gray-400 font-normal">(Optional)</span>
@@ -348,7 +348,7 @@ const Register = () => {
 
           <div className="mt-6 text-center text-sm">
             <p className="text-gray-600">
-              Already have an account?{' '}
+              Already have account?{' '}
               <Link to="/signin" className="text-green-600 hover:text-green-700 font-medium">
                 Sign in
               </Link>
