@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -19,7 +19,9 @@ import {
   Brain,
   Building2,
   Package,
-  Recycle
+  Recycle,
+  FileText,
+  Store
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import {
@@ -62,6 +64,11 @@ const TopNavigation = () => {
         label: "Waste Conversion",
         icon: <Recycle className="w-4 h-4" />,
       },
+      {
+        href: "/schemes",
+        label: "Schemes",
+        icon: <FileText className="w-4 h-4" />,
+      }
     ];
 
     if (isAuthenticated && selectedRole === 'farmer') {
@@ -102,7 +109,7 @@ const TopNavigation = () => {
         {
           href: "/marketplace",
           label: "Bazzar",
-          icon: <ShoppingBag className="w-4 h-4" />,
+          icon: <Store className="w-4 h-4" />,
         },
         ...baseItems,
       ];
@@ -341,7 +348,7 @@ const TopNavigation = () => {
 
   return (
     <>
-     <div className="fixed top-0 left-0 right-0 px-2 sm:px-4 py-2 sm:py-4 z-50 flex justify-center overflow-x-hidden">
+      <div className="fixed top-0 left-0 right-0 px-2 sm:px-4 py-2 sm:py-4 z-50 flex justify-center overflow-x-hidden">
         <nav className="w-[98%] max-w-none bg-white/70 backdrop-blur-lg rounded-2xl shadow-lg border border-green-100/20 px-3 sm:px-6 py-3">
           <div className="flex items-center justify-between">
             <Link to="/" className="flex items-center space-x-2">

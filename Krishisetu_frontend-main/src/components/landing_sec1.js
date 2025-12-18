@@ -1,22 +1,29 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { LeafIcon, TruckIcon, RecycleIcon, Sparkles } from 'lucide-react';
+import { LeafIcon, TruckIcon, RecycleIcon, Sparkles, Sprout } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const Landing_sec1 = () => {
   const navigate = useNavigate();
 
+  const handleCropCare = () => {
+    // Trigger exit animation and navigate to crop care
+    navigate('/cropcare', {
+      state: { animateEntrance: true }
+    });
+  };
+
   const handleGetStarted = () => {
     // Trigger exit animation and navigate to marketplace
-    navigate('/role-selection', { 
-      state: { animateEntrance: true } 
+    navigate('/role-selection', {
+      state: { animateEntrance: true }
     });
   };
 
   const handleDashboard = () => {
     // Trigger exit animation and navigate to dashboard
-    navigate('/dashboard', { 
-      state: { animateEntrance: true } 
+    navigate('/dashboard', {
+      state: { animateEntrance: true }
     });
   };
 
@@ -48,7 +55,7 @@ const Landing_sec1 = () => {
         ))}
       </div>
 
-      <motion.div 
+      <motion.div
         initial={{ x: -200, opacity: 0 }}
         animate={{ x: 0, opacity: 1 }}
         transition={{ duration: 1 }}
@@ -67,8 +74,8 @@ const Landing_sec1 = () => {
               Krishisetu :A new era of agricultural transformation
             </h1>
           </motion.div>
-          
-          <motion.p 
+
+          <motion.p
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.7, duration: 0.8 }}
@@ -76,15 +83,15 @@ const Landing_sec1 = () => {
           >
             Optimize waste,create values and opportunities ,promote sustainable agricultural practices
           </motion.p>
-          
+
           {/* CTA Buttons */}
-          <motion.div 
+          <motion.div
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.9, duration: 0.8 }}
             className="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-6"
           >
-            <button 
+            <button
               onClick={handleGetStarted}
               className="group relative px-8 py-4 rounded-xl bg-gradient-to-r from-green-500 to-emerald-600 text-white font-semibold text-lg overflow-hidden shadow-xl transition-all hover:shadow-green-500/30"
             >
@@ -94,8 +101,8 @@ const Landing_sec1 = () => {
                 <span>Get Started</span>
               </div>
             </button>
-            
-            <button 
+
+            <button
               onClick={handleDashboard}
               className="group relative px-8 py-4 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold text-lg overflow-hidden shadow-xl transition-all hover:shadow-blue-500/30"
             >
@@ -105,18 +112,29 @@ const Landing_sec1 = () => {
                 <span>Dashboard</span>
               </div>
             </button>
+
+            <button
+              onClick={handleCropCare}
+              className="group relative px-8 py-4 rounded-xl bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold text-lg overflow-hidden shadow-xl transition-all hover:shadow-blue-500/30"
+            >
+              <div className="absolute inset-0 bg-white/30 group-hover:translate-y-12 transition-transform duration-300"></div>
+              <div className="flex items-center space-x-2">
+                <Sprout className="animate-bounce" />
+                <span>Crop Care</span>
+              </div>
+            </button>
           </motion.div>
         </div>
 
         {/* Illustration - Hide on mobile */}
-        <motion.div 
+        <motion.div
           initial={{ x: 200, opacity: 0 }}
           animate={{ x: 0, opacity: 1 }}
           transition={{ duration: 1 }}
           className="hidden md:block relative"
         >
           <div className="absolute inset-0 bg-gradient-to-br from-green-400/20 to-emerald-400/20 blur-3xl transform rotate-12"></div>
-          <motion.div 
+          <motion.div
             animate={{
               y: [0, -20, 0],
               rotate: [0, 5, -5, 0]
@@ -129,8 +147,8 @@ const Landing_sec1 = () => {
             className="relative"
           >
             <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-green-400/30 to-emerald-400/30 blur-2xl"></div>
-            <RecycleIcon 
-              size={400} 
+            <RecycleIcon
+              size={400}
               className="text-green-600 drop-shadow-2xl filter"
             />
           </motion.div>

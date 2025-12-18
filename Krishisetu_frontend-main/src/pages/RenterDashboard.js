@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -11,7 +10,6 @@ import {
   MapPin,
   User,
   MessageSquare,
-  Edit3,
 } from "lucide-react";
 
 function RenterDashboard() {
@@ -51,16 +49,8 @@ function RenterDashboard() {
   ]);
 
   const [showRejectModal, setShowRejectModal] = useState(false);
-  const [showCounterModal, setShowCounterModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
-
   const [rejectReason, setRejectReason] = useState("");
-  const [counterOffer, setCounterOffer] = useState({
-    startDate: "",
-    endDate: "",
-    price: "",
-    notes: "",
-  });
 
   const handleApprove = (request) => {
     // Update the request status
@@ -89,40 +79,9 @@ function RenterDashboard() {
     }
   };
 
-  const handleCounterOffer = () => {
-    if (selectedRequest && counterOffer.startDate && counterOffer.endDate) {
-      // Update the request with counter offer
-      setRequests(
-        requests.map((r) =>
-          r.id === selectedRequest.id 
-            ? { 
-                ...r, 
-                status: "counter_offered",
-                counterOffer: counterOffer
-              } 
-            : r
-        )
-      );
-      setShowCounterModal(false);
-      setCounterOffer({ startDate: "", endDate: "", price: "", notes: "" });
-      setSelectedRequest(null);
-    }
-  };
-
   const openRejectModal = (request) => {
     setSelectedRequest(request);
     setShowRejectModal(true);
-  };
-
-  const openCounterModal = (request) => {
-    setSelectedRequest(request);
-    setCounterOffer({
-      startDate: request.startDate,
-      endDate: request.endDate,
-      price: request.totalAmount.toString(),
-      notes: "",
-    });
-    setShowCounterModal(true);
   };
 
   const calculateDays = (start, end) => {
@@ -300,14 +259,6 @@ function RenterDashboard() {
                           </button>
 
                           <button
-                            onClick={() => openCounterModal(request)}
-                            className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-blue-700 hover:to-cyan-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-                          >
-                            <Edit3 className="w-5 h-5" />
-                            Counter Offer
-                          </button>
-
-                          <button
                             onClick={() => openRejectModal(request)}
                             className="w-full bg-gradient-to-r from-red-600 to-rose-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-red-700 hover:to-rose-700 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
                           >
@@ -364,95 +315,6 @@ function RenterDashboard() {
                 className="flex-1 bg-gradient-to-r from-red-600 to-rose-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-red-700 hover:to-rose-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Confirm Reject
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showCounterModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-3xl shadow-2xl max-w-lg w-full p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="bg-blue-100 rounded-xl p-3">
-                <Edit3 className="w-6 h-6 text-blue-600" />
-              </div>
-              <h3 className="text-xl font-bold text-gray-900">Send Counter Offer</h3>
-            </div>
-
-            <div className="space-y-4 mb-6">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="text-sm font-semibold text-gray-900 mb-2 block">
-                    Start Date
-                  </label>
-                  <input
-                    type="date"
-                    value={counterOffer.startDate}
-                    onChange={(e) =>
-                      setCounterOffer({ ...counterOffer, startDate: e.target.value })
-                    }
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-semibold text-gray-900 mb-2 block">
-                    End Date
-                  </label>
-                  <input
-                    type="date"
-                    value={counterOffer.endDate}
-                    onChange={(e) =>
-                      setCounterOffer({ ...counterOffer, endDate: e.target.value })
-                    }
-                    className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-sm font-semibold text-gray-900 mb-2 block">
-                  Revised Price (₹)
-                </label>
-                <input
-                  type="number"
-                  value={counterOffer.price}
-                  onChange={(e) => setCounterOffer({ ...counterOffer, price: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
-                />
-              </div>
-
-              <div>
-                <label className="text-sm font-semibold text-gray-900 mb-2 block">
-                  Notes (Optional)
-                </label>
-                <textarea
-                  value={counterOffer.notes}
-                  onChange={(e) => setCounterOffer({ ...counterOffer, notes: e.target.value })}
-                  placeholder="Add any additional notes for the farmer..."
-                  rows={3}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all resize-none"
-                />
-              </div>
-            </div>
-
-            <div className="flex gap-3">
-              <button
-                onClick={() => {
-                  setShowCounterModal(false);
-                  setCounterOffer({ startDate: "", endDate: "", price: "", notes: "" });
-                  setSelectedRequest(null);
-                }}
-                className="flex-1 bg-gray-100 text-gray-700 py-3 px-6 rounded-xl font-semibold hover:bg-gray-200 transition-all"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleCounterOffer}
-                disabled={!counterOffer.startDate || !counterOffer.endDate}
-                className="flex-1 bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-3 px-6 rounded-xl font-semibold hover:from-blue-700 hover:to-cyan-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Send Counter Offer
               </button>
             </div>
           </div>

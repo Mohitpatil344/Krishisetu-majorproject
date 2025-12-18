@@ -24,6 +24,10 @@ import RenterDashboard from "./pages/RenterDashboard";
 import WasteConversionPage from "./pages/WasteConversionPage";
 import { ShoppingBag } from "phosphor-react";
 import DigitalMarketplace from './pages/DigitalMarketplace';
+import ChatbotIcon from "./components/ChatbotIcon";
+import Schemes from "./pages/Schemes";
+import CropCare from "./pages/cropcare";
+import FertilizerRecommendation from "./pages/fertilizerrecommendation";
 
 // Protected Route Component
 const ProtectedRoute = ({ children, requiredRole }) => {
@@ -78,33 +82,37 @@ const AppContent = () => {
           <Route path="/rental-details" element={<RentalDetails />} />
           <Route path="/farmer-registration" element={<FarmerRegistration />} />
           <Route path="/business-registration" element={<BusinessRegistration />} />
-       
+          <Route path="/cropcare" element={<CropCare />} />
+
           <Route path="/learn" element={<ResourcesPage />} />
           <Route path="/marketplace" element={<Marketplace />} />
           <Route path="/ai-lab" element={<AILab />} />
           <Route path="/waste/:id" element={<FarmerDetail />} />
           <Route path="/waste-conversion" element={<WasteConversionPage />} />
+          <Route path="/schemes" element={<Schemes />} />
+          <Route path="/fertilizer-recommendation" element={<FertilizerRecommendation />} />
 
 
-          <Route 
-            path="/farmerDashboard" 
+          <Route
+            path="/farmerDashboard"
             element={
               <ProtectedRoute requiredRole="farmer">
                 <FarmerDashboard />
               </ProtectedRoute>
-            } 
+            }
           />
-          <Route 
-            path="/businessDashboard" 
+          <Route
+            path="/businessDashboard"
             element={
               <ProtectedRoute requiredRole="business">
                 <BusinessDashboard />
               </ProtectedRoute>
-            } 
+            }
           />
           <Route path="/digitalmarketplace" element={<DigitalMarketplace />} />
           <Route path="*" element={<h1>404 Not Found</h1>} />
         </Routes>
+        <ChatbotIcon />
       </Router>
     </div>
   );

@@ -78,7 +78,7 @@ const SignIn = () => {
       if (selectedRole === 'farmer') {
         navigate('/farmerDashboard', { replace: true });
       } else {
-        navigate('/businessDashboard', { replace: true });
+        navigate('/marketplace', { replace: true });
       }
 
     } catch (error) {
