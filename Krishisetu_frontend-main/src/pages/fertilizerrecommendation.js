@@ -1,25 +1,68 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const FertilizerRecommendations = () => {
     const [crop, setCrop] = useState('');
     const [loading, setLoading] = useState(false);
     const [responseData, setResponseData] = useState(null);
     const [error, setError] = useState(null);
+    const [userLocation, setUserLocation] = useState(null);
+    const [locationLoading, setLocationLoading] = useState(true);
+    const apiKey = process.env.REACT_APP_GROQ_API_KEY;
 
-    // Mock user location data
-    const userLocation = {
-        city: 'Narnaund',
-        state: 'Haryana',
-        country: 'India',
-        lat: 29.2186,
-        lon: 76.1428
-    };
+    // Get user's current location
+    useEffect(() => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                async (position) => {
+                    const { latitude, longitude } = position.coords;
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+                    // Use reverse geocoding to get location details
+                    try {
+                        const response = await fetch(
+                            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
+                        );
+                        const data = await response.json();
 
+                        setUserLocation({
+                            city: data.address.city || data.address.town || data.address.village || 'Unknown',
+                            state: data.address.state || 'Unknown',
+                            country: data.address.country || 'Unknown',
+                            lat: latitude,
+                            lon: longitude
+                        });
+                        setLocationLoading(false);
+                    } catch (err) {
+                        console.error('Error getting location details:', err);
+                        setUserLocation({
+                            city: 'Unknown',
+                            state: 'Unknown',
+                            country: 'Unknown',
+                            lat: latitude,
+                            lon: longitude
+                        });
+                        setLocationLoading(false);
+                    }
+                },
+                (err) => {
+                    console.error('Error getting location:', err);
+                    setError('Unable to get your location. Please enable location permissions.');
+                    setLocationLoading(false);
+                }
+            );
+        } else {
+            setError('Geolocation is not supported by your browser.');
+            setLocationLoading(false);
+        }
+    }, []);
+
+    const handleSubmit = async () => {
         if (!crop.trim()) {
             setError('Please enter a crop name');
+            return;
+        }
+
+        if (!userLocation) {
+            setError('Location data not available. Please enable location permissions.');
             return;
         }
 
@@ -28,49 +71,75 @@ const FertilizerRecommendations = () => {
         setResponseData(null);
 
         try {
-            // Mock API response for demonstration
-            // Replace with actual API call: const res = await fetch(API_URL, {...})
+            // Call Groq API
+            const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${apiKey}`
+                },
+                body: JSON.stringify({
+                    model: 'llama-3.3-70b-versatile',
+                    messages: [
+                        {
+                            role: 'system',
+                            content: 'You are an expert agricultural advisor specializing in fertilizer recommendations. Provide detailed, location-specific fertilizer recommendations in a structured format with sections for Soil Analysis, Recommended Fertilizer, Application Rates, Timing and Method, Local Context, and Environmental Safety. Include a summary table at the end with columns: Nutrient, Quantity (kg/ha), Timing, Method.'
+                        },
+                        {
+                            role: 'user',
+                            content: `Please provide detailed fertilizer recommendations for ${crop} in ${userLocation.city}, ${userLocation.state}, ${userLocation.country} (Latitude: ${userLocation.lat.toFixed(4)}, Longitude: ${userLocation.lon.toFixed(4)}). 
 
-            setTimeout(() => {
-                const mockData = {
-                    status: 'success',
-                    recommendation: `**Soil Analysis**
-Based on your location in ${userLocation.city}, ${userLocation.state}, typical soil conditions suggest balanced NPK fertilizer application.
+Consider:
+1. Local soil conditions typical for this region
+2. Climate and weather patterns
+3. Optimal NPK ratios for ${crop}
+4. Application timing and methods
+5. Local availability and costs
+6. Environmental considerations
 
+Format your response with these sections:
+**Soil Analysis**
 **Recommended Fertilizer**
-For ${crop}, use a balanced NPK fertilizer ratio of 10-26-26 or similar composition.
-
 **Application Rates**
-Apply 150-200 kg per hectare during the growing season, split into 2-3 applications.
-
 **Timing and Method**
-First application at planting, second at vegetative stage, and third during flowering.
-
 **Local Context**
-Average cost in your region: ₹800-1200 per 50kg bag. Available at local agricultural stores.
-
 **Environmental Safety**
-Follow recommended dosages to prevent nutrient runoff. Maintain buffer zones near water sources.
-
 **Summary Table**
-| Nutrient | Quantity (kg/ha) | Timing | Method |
-|----------|------------------|--------|---------|
-| Nitrogen | 60-80 | Split application | Broadcast |
-| Phosphorus | 40-50 | At planting | Band placement |
-| Potassium | 40-50 | Split application | Broadcast |`,
-                    weather_data: {
-                        temperature: 28,
-                        humidity: 65,
-                        precipitation: 2.5,
-                        windspeed: 12
-                    }
-                };
 
-                setResponseData(mockData);
-                setLoading(false);
-            }, 1500);
+For the summary table, use this format:
+| Nutrient | Quantity (kg/ha) | Timing | Method |`
+                        }
+                    ],
+                    temperature: 0.7,
+                    max_tokens: 2000
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error?.message || 'Failed to get recommendations from Groq API');
+            }
+
+            const data = await response.json();
+            const recommendation = data.choices[0]?.message?.content || 'No recommendation available';
+
+            // Mock weather data (you can integrate a weather API here)
+            const mockWeatherData = {
+                temperature: 25,
+                humidity: 60,
+                precipitation: 2.0,
+                windspeed: 10
+            };
+
+            setResponseData({
+                status: 'success',
+                recommendation: recommendation,
+                weather_data: mockWeatherData
+            });
+            setLoading(false);
 
         } catch (err) {
+            console.error('Error:', err);
             setError(err?.message || 'An error occurred while fetching recommendations');
             setLoading(false);
         }
@@ -180,43 +249,70 @@ Follow recommended dosages to prevent nutrient runoff. Maintain buffer zones nea
                             <h4 className="font-semibold text-gray-800 text-base">{title}</h4>
                         </div>
                     )}
-                    <p className="text-sm text-gray-600 leading-relaxed">{content}</p>
+                    <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{content}</p>
                 </div>
             );
         });
     };
 
+    const handleKeyPress = (e, action) => {
+        if (e.key === 'Enter') {
+            action();
+        }
+    };
+
     return (
-        <div className="min-h-screen bg-gray-50 pt-24">
-            <div className="max-w-4xl mx-auto p-6">
-                <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-                    <h1 className="text-2xl font-bold text-gray-800 mb-2">Fertilizer Recommendations</h1>
+        <div className="min-h-screen bg-gradient-to-b from-green-50 to-gray-50 py-8 px-4">
+            <div className="max-w-4xl mx-auto">
+                {/* Location Status */}
+                <div className="bg-white rounded-lg shadow-sm p-4 mb-6">
+                    <div className="flex items-center gap-2">
+                        <span className="text-xl">📍</span>
+                        {locationLoading ? (
+                            <p className="text-sm text-gray-600">Getting your location...</p>
+                        ) : userLocation ? (
+                            <p className="text-sm text-gray-800">
+                                <span className="font-semibold">Your Location:</span> {userLocation.city}, {userLocation.state}, {userLocation.country}
+                            </p>
+                        ) : (
+                            <p className="text-sm text-red-600">Location unavailable</p>
+                        )}
+                    </div>
+                </div>
+
+                {/* Main Form */}
+                <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+                    <h1 className="text-3xl font-bold text-gray-800 mb-2 text-center">🌾 Fertilizer Recommendations</h1>
                     <p className="text-sm text-gray-600 mb-6 text-center">
-                        Get personalized fertilizer recommendations based on your crop and location
+                        Get AI-powered fertilizer recommendations based on your crop and location
                     </p>
 
-                    <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="space-y-4">
                         <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Crop Name
+                            </label>
                             <input
                                 type="text"
                                 className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent"
-                                placeholder="Enter crop name (e.g., Wheat, Rice, Cotton)"
+                                placeholder="e.g., Wheat, Rice, Cotton, Corn, Tomatoes"
                                 value={crop}
                                 onChange={(e) => setCrop(e.target.value)}
+                                onKeyPress={(e) => handleKeyPress(e, handleSubmit)}
                             />
                         </div>
 
                         <button
-                            type="submit"
-                            disabled={loading}
-                            className={`w-full py-3 px-4 rounded-md font-semibold text-white transition-colors ${loading
+                            onClick={handleSubmit}
+                            disabled={loading || locationLoading || !userLocation}
+                            className={`w-full py-3 px-4 rounded-md font-semibold text-white transition-colors ${loading || locationLoading || !userLocation
                                 ? 'bg-gray-400 cursor-not-allowed'
                                 : 'bg-green-600 hover:bg-green-700'
                                 }`}
                         >
-                            {loading ? 'Loading...' : 'Get Recommendations'}
+                            {loading ? '🔄 Analyzing...' : '✨ Get Recommendations'}
                         </button>
-                    </form>
+                    </div>
 
                     {error && (
                         <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-md">
@@ -225,22 +321,29 @@ Follow recommended dosages to prevent nutrient runoff. Maintain buffer zones nea
                     )}
                 </div>
 
+                {/* Results */}
                 {responseData && (
                     <div className="space-y-6">
-                        <div className="bg-white rounded-lg shadow-sm p-6">
-                            <h2 className="text-xl font-bold text-gray-800 mb-4">Fertilizer Recommendations</h2>
-                            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                        <div className="bg-white rounded-lg shadow-lg p-6">
+                            <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                <span>🌱</span> Fertilizer Recommendations
+                            </h2>
+                            <div className="bg-gradient-to-br from-green-50 to-blue-50 rounded-lg p-6 border border-green-200">
                                 {renderRecommendationWithIcons()}
                             </div>
                         </div>
 
-                        <div className="bg-white rounded-lg shadow-sm p-6">
-                            <h2 className="text-xl font-bold text-gray-800 mb-4">Weather Conditions</h2>
+                        <div className="bg-white rounded-lg shadow-lg p-6">
+                            <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                <span>🌤️</span> Weather Conditions
+                            </h2>
                             {renderWeatherCard()}
                         </div>
 
-                        <div className="bg-white rounded-lg shadow-sm p-6">
-                            <h2 className="text-xl font-bold text-gray-800 mb-4">Summary Table</h2>
+                        <div className="bg-white rounded-lg shadow-lg p-6">
+                            <h2 className="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                <span>📊</span> Application Summary
+                            </h2>
                             {renderSummaryTable()}
                         </div>
                     </div>

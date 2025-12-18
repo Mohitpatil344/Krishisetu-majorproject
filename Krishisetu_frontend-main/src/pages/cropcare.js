@@ -35,6 +35,7 @@ export default function CropCare() {
     const [diagnosis, setDiagnosis] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+    const apiKey = process.env.REACT_APP_GROQ_API_KEY;
 
     const handleFileSelect = async (e) => {
         const file = e.target.files?.[0];
@@ -45,42 +46,87 @@ export default function CropCare() {
             setImage(reader.result);
             setDiagnosis(null);
             setError(null);
-            simulateUpload();
+            analyzeImage(reader.result);
         };
         reader.readAsDataURL(file);
     };
 
-    const simulateUpload = () => {
+    const analyzeImage = async (base64Image) => {
+        if (!apiKey) {
+            setError('API Key not found. Please check your environment configuration.');
+            return;
+        }
+
         setLoading(true);
         setError(null);
 
-        setTimeout(() => {
-            setDiagnosis({
-                disease: 'Tomato Late Blight',
-                plant: 'Tomato (Solanum lycopersicum)',
-                type_of_disease: 'Fungal',
-                plant_health: 'mildly affected',
-                leaf_health: 'severely affected',
-                treatment_required: true,
-                disease_symptoms: [
-                    'Dark brown to black lesions on leaves',
-                    'White mold growth on leaf undersides',
-                    'Water-soaked spots that rapidly enlarge',
-                    'Affected leaves turn brown and die',
-                ],
-                treatment_procedure: `### Immediate Actions
-1. **Remove infected leaves** - Cut off and destroy all affected foliage
-2. **Improve air circulation** - Space plants properly and prune dense areas
-3. **Apply fungicide** - Use copper-based fungicides every 7-10 days
+        try {
+            const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+                    messages: [
+                        {
+                            role: 'user',
+                            content: [
+                                {
+                                    type: 'text',
+                                    text: `You are an expert agricultural pathologist. Analyze this plant image and provide a detailed diagnosis in JSON format with the following structure:
+{
+  "disease": "name of disease or 'Healthy' if no disease detected",
+  "plant": "plant species name (common and scientific)",
+  "type_of_disease": "Fungal/Bacterial/Viral/Pest/Nutritional/None",
+  "plant_health": "healthy/mildly affected/severely affected/dead",
+  "leaf_health": "healthy/mildly affected/severely affected/dead",
+  "treatment_required": true or false,
+  "disease_symptoms": ["symptom 1", "symptom 2", ...],
+  "treatment_procedure": "Detailed treatment steps in markdown format with ### headers for sections"
+}
 
-### Long-term Management
-- Water at the base of plants, avoid wetting foliage
-- Apply mulch to prevent soil splash
-- Rotate crops annually to break disease cycle
-- Choose resistant varieties for future plantings`,
+Be specific and accurate. If the plant appears healthy, say so. Only respond with valid JSON.`
+                                },
+                                {
+                                    type: 'image_url',
+                                    image_url: {
+                                        url: base64Image
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    temperature: 0.3,
+                    max_tokens: 2000,
+                }),
             });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error?.message || 'Failed to analyze image');
+            }
+
+            const data = await response.json();
+            const content = data.choices[0]?.message?.content || '';
+
+            // Extract JSON from response
+            let jsonStr = content.trim();
+            if (jsonStr.includes('```json')) {
+                jsonStr = jsonStr.split('```json')[1].split('```')[0].trim();
+            } else if (jsonStr.includes('```')) {
+                jsonStr = jsonStr.split('```')[1].split('```')[0].trim();
+            }
+
+            const diagnosisData = JSON.parse(jsonStr);
+            setDiagnosis(diagnosisData);
             setLoading(false);
-        }, 2000);
+        } catch (err) {
+            console.error('Analysis error:', err);
+            setError(err.message || 'Failed to analyze image. Please check your API key and try again.');
+            setLoading(false);
+        }
     };
 
     return (
@@ -94,7 +140,7 @@ export default function CropCare() {
                         </div>
                         <div>
                             <h1 className="text-3xl font-bold text-gray-900">Crop Care</h1>
-                            <p className="text-sm text-gray-600">AI-powered plant disease diagnosis</p>
+                            <p className="text-sm text-gray-600">AI-powered plant disease diagnosis with Groq</p>
                         </div>
                     </div>
                 </div>
@@ -158,14 +204,14 @@ export default function CropCare() {
                 {loading && (
                     <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
                         <Loader2 className="w-12 h-12 text-green-600 animate-spin mx-auto mb-4" />
-                        <p className="text-lg font-medium text-gray-700">Analyzing your crop image...</p>
+                        <p className="text-lg font-medium text-gray-700">Analyzing your crop image with Groq AI...</p>
                         <p className="text-sm text-gray-500 mt-2">This may take a few moments</p>
                     </div>
                 )}
 
                 {/* Error State */}
                 {error && (
-                    <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
+                    <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3 mb-6">
                         <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
                         <div>
                             <h3 className="font-semibold text-red-800">Error</h3>
@@ -307,8 +353,9 @@ export default function CropCare() {
                                 Get Started
                             </h2>
                             <p className="text-gray-600 mb-6">
-                                Upload a photo of your crop or take a new picture to receive an instant AI-powered diagnosis of potential diseases and treatment recommendations.
+                                Upload a photo of your crop or take a new picture to receive an instant AI-powered diagnosis of potential diseases and treatment recommendations using Groq's vision AI.
                             </p>
+
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
                                 <div className="bg-green-50 p-4 rounded-lg">
                                     <div className="text-2xl font-bold text-green-600 mb-2">1</div>
@@ -316,7 +363,7 @@ export default function CropCare() {
                                 </div>
                                 <div className="bg-green-50 p-4 rounded-lg">
                                     <div className="text-2xl font-bold text-green-600 mb-2">2</div>
-                                    <p className="text-sm text-gray-700">AI analyzes the image for disease symptoms</p>
+                                    <p className="text-sm text-gray-700">Groq AI analyzes the image for disease symptoms</p>
                                 </div>
                                 <div className="bg-green-50 p-4 rounded-lg">
                                     <div className="text-2xl font-bold text-green-600 mb-2">3</div>
